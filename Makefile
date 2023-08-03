@@ -1,4 +1,4 @@
-.PHONY: test format clean
+.PHONY: test format lint clean cache
 
 venv: venv/touchfile
 
@@ -16,7 +16,13 @@ test-v: venv
 format: venv
 	. venv/bin/activate; isort . && black .
 
-ft: format test
+lint: venv
+	. venv/bin/activate; ruff check .
+
+cache: venv
+	. venv/bin/activate; pyclean .
+
+ftl: format test lint cache
 
 clean:
 	rm -rf venv
