@@ -2,3 +2,5 @@ isort
 black
 pytest
 numpy
+pyclean
+ruff
