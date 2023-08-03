@@ -1,0 +1,30 @@
+# .github/workflows/pytest.yaml
+name: PyTest
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository code ✅
+        uses: actions/checkout@v3
+
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Create virtual environment and install dependencies 🌳
+        run: make venv
+
+      - name: Run test suite 🧪
+        run: make test
