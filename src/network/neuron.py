@@ -1,13 +1,15 @@
-import numpy as np
+from typing import Callable, List
 
-from src.functions.sigmoid import sigmoid
+import numpy as np
 
 
 class Neuron:
-    def __init__(self, weights, bias) -> None:
+    def __init__(self, weights: List[float], bias: float) -> None:
         self.weights = weights
         self.bias = bias
 
-    def feedforward(self, inputs):
+    def feedforward(
+        self, inputs: List[float], activation_function: Callable[[float], float]
+    ) -> float:
         total = np.dot(self.weights, inputs) + self.bias
-        return sigmoid(total)
+        return activation_function(total)
