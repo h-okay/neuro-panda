@@ -1,30 +1,52 @@
+import numpy as np
+import pytest
+from src.network.layer import Layer
 from src.network.neural_network import NeuralNetwork
 from src.network.neuron import Neuron
-from src.functions.activation import sigmoid, relu, tanh
+from src.functions.sigmoid import Sigmoid
 
 
-def test_feedforward_sigmoid():
-    hidden_layer = [Neuron([0.5, 0.5], -1, sigmoid), Neuron([1, -1], 0, sigmoid)]
-    output_layer = Neuron([0.2, 0.3], 0.1, sigmoid)
-    network_builder = NeuralNetwork([1, 1], 0, hidden_layer, output_layer)
-    input_data = [2, 3]
-    expected_output = 0.5852097408844837
-    expected_output, network_builder.feedforward(input_data)
+@pytest.fixture
+def sigmoid_activation():
+    return Sigmoid()
 
 
-def test_feedforward_relu():
-    hidden_layer = [Neuron([0.5, 0.5], -1, relu), Neuron([1, -1], 0, relu)]
-    output_layer = Neuron([0.2, 0.3], 0.1, relu)
-    network_builder = NeuralNetwork([1, 1], 0, hidden_layer, output_layer)
-    input_data = [2, 3]
-    expected_output = 1.3
-    expected_output, network_builder.feedforward(input_data)
+def test_layer_forward(sigmoid_activation):
+    activation_function = sigmoid_activation
+    layer = Layer(input_size=2, output_size=2, activation_function=activation_function)
+    layer.weights = np.array([[0.1, 0.2], [0.4, 0.5]])
+    layer.bias = np.array([0.1, 0.2])
+    inputs = np.array([[0.5, 0.6], [0.7, 0.8]])
+    expected_output = activation_function(np.dot(inputs, layer.weights) + layer.bias)
+    assert np.allclose(layer.forward(inputs), expected_output)
 
 
-def test_feedforward_tanh():
-    hidden_layer = [Neuron([0.5, 0.5], -1, tanh), Neuron([1, -1], 0, tanh)]
-    output_layer = Neuron([0.2, 0.3], 0.1, tanh)
-    network_builder = NeuralNetwork([1, 1], 0, hidden_layer, output_layer)
-    input_data = [2, 3]
-    expected_output = 0.6913526512322059
-    expected_output, network_builder.feedforward(input_data)
+def test_neuron_forward(sigmoid_activation):
+    activation_function = sigmoid_activation
+    neuron = Neuron(activation_function)
+    neuron.weights = np.array([0.1, 0.2])
+    neuron.bias = np.array([0.1])
+    inputs = np.array([[0.5, 0.6]])
+    expected_output = activation_function(np.dot(inputs, neuron.weights) + neuron.bias)
+    assert np.allclose(neuron.forward(inputs), expected_output)
+
+
+def test_neural_network_forward():
+    nn = NeuralNetwork(input_size=2, hidden_size=3, output_size=1)
+    nn.hidden_layer.weights = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    nn.hidden_layer.bias = np.array([0.1, 0.2, 0.3])
+    nn.output_layer.weights = np.array(
+        [[0.7], [0.8], [0.9]]
+    )  # Fix the shape of the weights
+    nn.output_layer.bias = np.array([0.4])
+    inputs = np.array([[0.5, 0.6], [0.7, 0.8]])
+    hidden_output = nn.hidden_layer.forward(inputs)
+    expected_output = nn.output_layer.activation_function(
+        np.dot(hidden_output, nn.output_layer.weights) + nn.output_layer.bias
+    )
+    assert np.allclose(nn.forward(inputs), expected_output)
+
+
+def test_neural_network_train():
+    # Implement training tests here, if needed.
+    pass
